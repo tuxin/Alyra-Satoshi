@@ -196,6 +196,7 @@ contract Voting is Ownable {
 
     /**
      * @dev New proposal for the msg.sender. Only one proposal per user per session id
+	 * @param _description of the proposal
     */
     function registerProposals(string memory _description) public checkRegistered{
         bytes memory EmptyDescription = bytes(_description);
