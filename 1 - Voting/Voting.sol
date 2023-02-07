@@ -8,12 +8,12 @@ contract Voting is Ownable {
     struct Voter {
         bool isRegistered;
         bool hasVoted;
-        uint votedProposalId;
+        uint256 votedProposalId;
     }
 
     struct Proposal {
         string description;
-        uint voteCount; 
+        uint256 voteCount; 
     }
 
     enum WorkflowStatus {
@@ -25,7 +25,6 @@ contract Voting is Ownable {
         VotesTallied
     }
 
-    uint SessionID;
     WorkflowStatus workflowStatus=WorkflowStatus.VotesTallied;
 
     // Returns uint
@@ -58,6 +57,9 @@ contract Voting is Ownable {
        _;
     }
 
+    /**
+     * @dev Modifier if the user is registered
+     */
     modifier checkRegistered() { 
        require(VoterList[msg.sender].isRegistered== true,"Not Registered.");
        _;
@@ -90,7 +92,7 @@ contract Voting is Ownable {
     function RemoveWhitelist(address _address) public onlyOwner {
         Whitelist[_address] = false; //No Check because we set to false
 
-        for(uint i = 0; i < WhiteListArray.length; i++) {
+        for(uint256 i = 0; i < WhiteListArray.length; i++) {
             if (WhiteListArray[i]==_address){
                 delete WhiteListArray[i];
                 break;
@@ -105,7 +107,7 @@ contract Voting is Ownable {
      * @dev Set for enum WorkflowStatus
      * @param _workflowStatus Status of new WorkflowStatus
     */
-    function setWorkflowStatus(WorkflowStatus _workflowStatus) public {
+    function setWorkflowStatus(WorkflowStatus _workflowStatus) private {
         WorkflowStatus oldWorkflowStatus = workflowStatus;
         workflowStatus = _workflowStatus;
         emit WorkflowStatusChange(oldWorkflowStatus,_workflowStatus);
@@ -122,9 +124,6 @@ contract Voting is Ownable {
     function openRegistration() public onlyOwner{
         require(workflowStatus==WorkflowStatus.VotesTallied, "The registration is not open");
         setWorkflowStatus(WorkflowStatus.RegisteringVoters);
-        
-        //New sessionId
-        SessionID++;
 
         //We reset all data
         resetMappingVoted();
@@ -145,7 +144,6 @@ contract Voting is Ownable {
         require(workflowStatus==WorkflowStatus.ProposalsRegistrationStarted, "The vote is not in ProposalsRegistrationStarted");
         setWorkflowStatus(WorkflowStatus.ProposalsRegistrationEnded);
     }
-
 
     /**
      * @dev We open the ProposalsRegistration
@@ -175,7 +173,7 @@ contract Voting is Ownable {
      * @dev Reset all data for Voters. Its a new session id.
     */
     function resetMappingVoted() private onlyOwner{
-        for(uint i = 0; i < WhiteListArray.length; i++) {
+        for(uint256 i = 0; i < WhiteListArray.length; i++) {
             VoterList[WhiteListArray[i]].isRegistered=false;
             VoterList[WhiteListArray[i]].hasVoted=false;
             VoterList[WhiteListArray[i]].votedProposalId=0;
@@ -186,7 +184,7 @@ contract Voting is Ownable {
 
 
     /**
-     * @dev We register voter only for the whitelist address
+     * @dev We register voter only for the whitelist address. Each voter register himself
     */
     function registerVoter() public checkWhitelist{
         require(workflowStatus==WorkflowStatus.RegisteringVoters, "The registration is not open");
@@ -214,15 +212,15 @@ contract Voting is Ownable {
      * @dev Vote for the proposal
      * @param proposalId Proposal ID
     */
-    function voteProposal(uint proposalId) public{
+    function voteProposal(uint256 proposalId) public{
         require(workflowStatus==WorkflowStatus.VotingSessionStarted,"Vote is not open");
         require( VoterList[msg.sender].isRegistered==true,"Not registered for this vote");
         require( VoterList[msg.sender].hasVoted==false,"Already voted");
         require( VoterList[msg.sender].votedProposalId==0,"Already voted");
-        require( proposalId>=proposals.length,"This proposal not exist");
+        require( proposalId<=proposals.length,"This proposal not exist");
         require( proposalId>0,"This proposal not exist");
 
-        uint proposalIdArray;
+        uint256 proposalIdArray;
         proposalIdArray=proposalId-1;
 
         VoterList[msg.sender].hasVoted=true;
@@ -236,40 +234,51 @@ contract Voting is Ownable {
     /**
      * @dev ProposalId Winner
     */
-    function getWinnerProposalId() public view returns (uint){
+    function getWinnerProposalId() public view returns (uint256){
         require(workflowStatus==WorkflowStatus.VotesTallied,"Vote is not tallaied");
 
-        uint winningVoteCount = 0;
-        uint winningProposal = 0;
+        uint256 winningVoteCount = 0;
+        uint256 winningProposal = 0;
+        bool ErrResult;
 
-        for (uint i = 0; i < proposals.length; i++) {
+        for (uint256 i = 0; i < proposals.length; i++) {
             if (proposals[i].voteCount > winningVoteCount) {
                 winningVoteCount = proposals[i].voteCount;
                 winningProposal = i;
             }
+
+            //Same votecount for proposals
+            if ((proposals[i].voteCount>0) && (proposals[i].voteCount==winningVoteCount)){
+                ErrResult=true;
+            }
         }
-        
-        winningProposal+=1;
+
+        //No vote
+        if(winningVoteCount==0){
+            ErrResult=true;
+        }   
+
+        if (ErrResult==true){
+            winningProposal=0;
+        }else{
+            winningProposal+=1;
+        }
+
         return winningProposal;
     } 
 
     /**
      * @dev Proposal Description Winner
     */
-    function getWinnerProposalName() public view returns (string memory){
-        require(workflowStatus==WorkflowStatus.VotesTallied,"Vote is not tallaied");
+    function getWinnerProposalName() public view returns (string memory){    
+        uint256 proposal;
+        proposal=getWinnerProposalId();
 
-        uint winningVoteCount = 0;
-        uint winningProposal = 0;
-
-        for (uint i = 0; i < proposals.length; i++) {
-            if (proposals[i].voteCount > winningVoteCount) {
-                winningVoteCount = proposals[i].voteCount;
-                winningProposal = i;
-            }
+        if(proposal==0){
+            return "No winner";
+        }else{
+            return proposals[getWinnerProposalId()].description;
         }
-        
-        return proposals[winningProposal].description;
     } 
 
 }
