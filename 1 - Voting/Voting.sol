@@ -210,25 +210,25 @@ contract Voting is Ownable {
 
     /**
      * @dev Vote for the proposal
-     * @param proposalId Proposal ID
+     * @param _proposalId Proposal ID
     */
-    function voteProposal(uint256 proposalId) public{
+    function voteProposal(uint256 _proposalId) public{
         require(workflowStatus==WorkflowStatus.VotingSessionStarted,"Vote is not open");
         require( VoterList[msg.sender].isRegistered==true,"Not registered for this vote");
         require( VoterList[msg.sender].hasVoted==false,"Already voted");
         require( VoterList[msg.sender].votedProposalId==0,"Already voted");
-        require( proposalId<=proposals.length,"This proposal not exist");
-        require( proposalId>0,"This proposal not exist");
+        require( _proposalId<=proposals.length,"This proposal not exist");
+        require( _proposalId>0,"This proposal not exist");
 
         uint256 proposalIdArray;
-        proposalIdArray=proposalId-1;
+        proposalIdArray=_proposalId-1;
 
         VoterList[msg.sender].hasVoted=true;
-        VoterList[msg.sender].votedProposalId=proposalId;
+        VoterList[msg.sender].votedProposalId=_proposalId;
 
         proposals[proposalIdArray].voteCount+=1;
       
-        emit Voted(msg.sender,proposalId);
+        emit Voted(msg.sender,_proposalId);
     }
 	
     /**
