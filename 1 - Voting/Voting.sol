@@ -242,14 +242,15 @@ contract Voting is Ownable {
         bool ErrResult;
 
         for (uint256 i = 0; i < proposals.length; i++) {
-            if (proposals[i].voteCount > winningVoteCount) {
-                winningVoteCount = proposals[i].voteCount;
-                winningProposal = i;
-            }
 
             //Same votecount for proposals
             if ((proposals[i].voteCount>0) && (proposals[i].voteCount==winningVoteCount)){
                 ErrResult=true;
+            }
+
+            if (proposals[i].voteCount > winningVoteCount) {
+                winningVoteCount = proposals[i].voteCount;
+                winningProposal = i;
             }
         }
 
@@ -268,7 +269,7 @@ contract Voting is Ownable {
     } 
 
     /**
-     * @dev Proposal Description Winner
+     * @dev Proposal description Winner
     */
     function getWinnerProposalName() public view returns (string memory){    
         uint256 proposal;
@@ -277,7 +278,23 @@ contract Voting is Ownable {
         if(proposal==0){
             return "No winner";
         }else{
-            return proposals[getWinnerProposalId()].description;
+            proposal-=1; //To have the good table index
+            return proposals[proposal].description;
+        }
+    } 
+
+    /**
+    * @dev Proposal vote number winner
+    */
+    function getWinnerProposalVoteCount() public view returns (uint256){    
+        uint256 proposal;
+        proposal=getWinnerProposalId();
+
+        if(proposal==0){
+            return 0;
+        }else{
+            proposal-=1; //To have the good table index
+            return proposals[proposal].voteCount;
         }
     } 
 
