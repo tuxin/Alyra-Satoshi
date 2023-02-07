@@ -232,7 +232,10 @@ contract Voting is Ownable {
       
         emit Voted(msg.sender,proposalId);
     }
-
+	
+    /**
+     * @dev ProposalId Winner
+    */
     function getWinnerProposalId() public view returns (uint){
         require(workflowStatus==WorkflowStatus.VotesTallied,"Vote is not tallaied");
 
@@ -250,6 +253,9 @@ contract Voting is Ownable {
         return winningProposal;
     } 
 
+    /**
+     * @dev Proposal Description Winner
+    */
     function getWinnerProposalName() public view returns (string memory){
         require(workflowStatus==WorkflowStatus.VotesTallied,"Vote is not tallaied");
 
