@@ -174,7 +174,7 @@ contract Voting is Ownable {
     /**
      * @dev Reset all data for Voters. Its a new session id.
     */
-    function resetMappingVoted() public onlyOwner{
+    function resetMappingVoted() private onlyOwner{
         for(uint i = 0; i < WhiteListArray.length; i++) {
             VoterList[WhiteListArray[i]].isRegistered=false;
             VoterList[WhiteListArray[i]].hasVoted=false;
