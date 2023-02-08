@@ -298,4 +298,12 @@ contract Voting is Ownable {
         }
     } 
 
+    /**
+     * @dev Return the proposal id for a address voter
+     * @param _address address of the voter
+    */
+    function getVotePerson(address _address) public view returns (uint256){
+            return VoterList[_address].votedProposalId;
+    }
+
 }
