@@ -115,6 +115,7 @@ contract Voting is Ownable {
 
     /**
      * @dev Get for enum WorkflowStatus
+     * @return return WorkflowStatus for the current status
     */
     function getWorkflowStatus() public view returns (WorkflowStatus) {
         return workflowStatus;
@@ -233,6 +234,7 @@ contract Voting is Ownable {
 	
     /**
      * @dev ProposalId Winner
+     * @return return uint for the proposal id for the winner
     */
     function getWinnerProposalId() public view returns (uint256){
         require(workflowStatus==WorkflowStatus.VotesTallied,"Vote is not tallaied");
@@ -270,6 +272,7 @@ contract Voting is Ownable {
 
     /**
      * @dev Proposal description Winner
+     * @return return string for the description of vote  for the winner
     */
     function getWinnerProposalName() public view returns (string memory){    
         uint256 proposal;
@@ -285,6 +288,7 @@ contract Voting is Ownable {
 
     /**
     * @dev Proposal vote number winner
+    * @return return uint for the number of vote  for the winner
     */
     function getWinnerProposalVoteCount() public view returns (uint256){    
         uint256 proposal;
@@ -301,6 +305,7 @@ contract Voting is Ownable {
     /**
      * @dev Return the proposal id for a address voter
      * @param _address address of the voter
+     * @return return uint for the voted proposal id
     */
     function getVotePerson(address _address) public view returns (uint256){
             return VoterList[_address].votedProposalId;
