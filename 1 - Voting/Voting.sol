@@ -117,7 +117,7 @@ contract Voting is Ownable {
      * @dev Get for enum WorkflowStatus
      * @return return WorkflowStatus for the current status
     */
-    function getWorkflowStatus() public view returns (WorkflowStatus) {
+    function getWorkflowStatus() external view returns (WorkflowStatus) {
         return workflowStatus;
     }
 
@@ -274,7 +274,7 @@ contract Voting is Ownable {
      * @dev Proposal description Winner
      * @return return string for the description of vote  for the winner
     */
-    function getWinnerProposalName() public view returns (string memory){    
+    function getWinnerProposalName() external view returns (string memory){    
         uint256 proposal;
         proposal=getWinnerProposalId();
 
@@ -290,7 +290,7 @@ contract Voting is Ownable {
     * @dev Proposal vote number winner
     * @return return uint for the number of vote  for the winner
     */
-    function getWinnerProposalVoteCount() public view returns (uint256){    
+    function getWinnerProposalVoteCount() external view returns (uint256){    
         uint256 proposal;
         proposal=getWinnerProposalId();
 
@@ -307,7 +307,7 @@ contract Voting is Ownable {
      * @param _address address of the voter
      * @return return uint for the voted proposal id
     */
-    function getVotePerson(address _address) public view returns (uint256){
+    function getVotePerson(address _address) external view returns (uint256){
             return VoterList[_address].votedProposalId;
     }
 
