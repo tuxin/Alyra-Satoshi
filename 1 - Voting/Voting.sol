@@ -107,7 +107,7 @@ contract Voting is Ownable {
      * @dev Set for enum WorkflowStatus
      * @param _workflowStatus Status of new WorkflowStatus
     */
-    function setWorkflowStatus(WorkflowStatus _workflowStatus) private {
+    function _setWorkflowStatus(WorkflowStatus _workflowStatus) private {
         WorkflowStatus oldWorkflowStatus = workflowStatus;
         workflowStatus = _workflowStatus;
         emit WorkflowStatusChange(oldWorkflowStatus,_workflowStatus);
@@ -124,7 +124,7 @@ contract Voting is Ownable {
     //We reset all voted data
     function openRegistration() public onlyOwner{
         require(workflowStatus==WorkflowStatus.VotesTallied, "The registration is not open");
-        setWorkflowStatus(WorkflowStatus.RegisteringVoters);
+        _setWorkflowStatus(WorkflowStatus.RegisteringVoters);
 
         //We reset all data
         resetMappingVoted();
@@ -135,7 +135,7 @@ contract Voting is Ownable {
     */
     function openProposalsRegistration() public onlyOwner{
         require(workflowStatus==WorkflowStatus.RegisteringVoters, "The vote is not in RegisteringVoters");
-        setWorkflowStatus(WorkflowStatus.ProposalsRegistrationStarted);
+        _setWorkflowStatus(WorkflowStatus.ProposalsRegistrationStarted);
     }
 
     /**
@@ -143,7 +143,7 @@ contract Voting is Ownable {
     */
     function closeProposalsRegistration() public onlyOwner{
         require(workflowStatus==WorkflowStatus.ProposalsRegistrationStarted, "The vote is not in ProposalsRegistrationStarted");
-        setWorkflowStatus(WorkflowStatus.ProposalsRegistrationEnded);
+        _setWorkflowStatus(WorkflowStatus.ProposalsRegistrationEnded);
     }
 
     /**
@@ -151,7 +151,7 @@ contract Voting is Ownable {
     */
     function openVotingSession() public onlyOwner{
         require(workflowStatus==WorkflowStatus.ProposalsRegistrationEnded, "The vote is not in ProposalsRegistrationEnded");
-        setWorkflowStatus(WorkflowStatus.VotingSessionStarted);
+        _setWorkflowStatus(WorkflowStatus.VotingSessionStarted);
     }
 
     /**
@@ -159,7 +159,7 @@ contract Voting is Ownable {
     */
     function closeVotingSession() public onlyOwner{
         require(workflowStatus==WorkflowStatus.VotingSessionStarted, "The vote is not in VotingSessionStarted");
-        setWorkflowStatus(WorkflowStatus.VotingSessionEnded);
+        _setWorkflowStatus(WorkflowStatus.VotingSessionEnded);
     }
 
     /**
@@ -167,7 +167,7 @@ contract Voting is Ownable {
     */
     function votesTallied() public onlyOwner{
         require(workflowStatus==WorkflowStatus.VotingSessionEnded, "The vote is not in VotingSessionEnded");
-        setWorkflowStatus(WorkflowStatus.VotesTallied);
+        _setWorkflowStatus(WorkflowStatus.VotesTallied);
     }
 
     /**
