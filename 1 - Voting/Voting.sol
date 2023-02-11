@@ -121,12 +121,11 @@ contract Voting is Ownable {
         return workflowStatus;
     }
 
-	//Possibilité de factoriser tout ça avec un front qui drive tout en passant l'enum
     /**
      * @dev We open the Registration
     */
     function openRegistration() public onlyOwner{
-        require(workflowStatus==WorkflowStatus.VotesTallied, "The registration is not open");
+        require(workflowStatus==WorkflowStatus.VotesTallied, "We have vote in progress");
         _setWorkflowStatus(WorkflowStatus.RegisteringVoters);
 
         //We reset all data
