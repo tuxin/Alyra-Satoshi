@@ -34,29 +34,6 @@ Création d'un test pour s'assurer que le voter n'a pas déjà voté, qu'il vote
 //tallyVotes. Check the require WorkflowStatus
 Création d'un test pour s'assurer qu'on ne peut pas voter dans n'importe quel status  
 
-
-
-    //tallyVotes. if the proposal is not 0 and event
-    it("tallyVotes", async () => {
-      
-      // 0 We need setup
-      await VotingInstance.addVoter(_Voter1);
-      await VotingInstance.addVoter(_Voter2);
-      await VotingInstance.addVoter(_Voter3);
-      await VotingInstance.startProposalsRegistering({from: _owner});
-      await VotingInstance.addProposal("Proposal 1",{from: _Voter1});
-      await VotingInstance.addProposal("Proposal 2",{from: _Voter2});
-      await VotingInstance.endProposalsRegistering({from: _owner});
-      await VotingInstance.startVotingSession({from: _owner});
-      await VotingInstance.setVote(1,{from: _Voter1});
-      await VotingInstance.setVote(1,{from: _Voter2});
-      await VotingInstance.setVote(2,{from: _Voter3});
-      await VotingInstance.endVotingSession({from: _owner});
-
-      //1 - Event
-      const resulttallyVotes = await VotingInstance.tallyVotes({from: _owner});
-      
-      expectEvent(resulttallyVotes, 'WorkflowStatusChange', {
-        previousStatus: new BN(4),
-        newStatus: new BN(5)
-    }) 
+//tallyVotes. Check the id and event
+Création d'un test pour s'assurer que l'idwinner ne soit pas 0 et que l'event se déclenche
+  

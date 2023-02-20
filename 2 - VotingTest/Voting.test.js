@@ -320,14 +320,22 @@ contract("Voting", accounts => {
       await VotingInstance.addProposal("Proposal 2",{from: _Voter2});
       await VotingInstance.endProposalsRegistering({from: _owner});
       await VotingInstance.startVotingSession({from: _owner});
-      await VotingInstance.setVote(1,{from: _Voter1});
+      await VotingInstance.setVote(2,{from: _Voter1});
       await VotingInstance.setVote(1,{from: _Voter2});
       await VotingInstance.setVote(2,{from: _Voter3});
       await VotingInstance.endVotingSession({from: _owner});
 
       //1 - Event
-      await VotingInstance.tallyVotes.call();
-      console.log(VotingInstance.winningProposalID);
+      const resulttallyVotes = await VotingInstance.tallyVotes({from: _owner});
+      expectEvent(resulttallyVotes, 'WorkflowStatusChange', {
+        previousStatus: new BN(4),
+        newStatus: new BN(5)
+      });
+
+
       
+      
+
+      expect(await VotingInstance.winningProposalID.call()).to.be.bignumber.not.equal(new BN(0));
     }) 
 });
