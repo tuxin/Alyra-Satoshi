@@ -36,4 +36,9 @@ Création d'un test pour s'assurer qu'on ne peut pas voter dans n'importe quel s
 
 //tallyVotes. Check the id and event
 Création d'un test pour s'assurer que l'idwinner ne soit pas 0 et que l'event se déclenche
-  
+
+//proposalsArray Size and value
+Création d'un test pour la limite du array et vérifier que les proposals sont bien enregistrés. Le test est long si on met une grande valeur
+
+//Big proposal. Size of string proposal
+Création d'un test pour vérifier si on peut mettre une grande proposition

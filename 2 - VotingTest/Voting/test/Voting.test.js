@@ -38,16 +38,19 @@ contract("Voting", accounts => {
 
     //Global Testing
     it("Owner of contract", async () => {
+      // 1 - We test the contract owner
       expect(await VotingInstance.owner()).to.equal(_owner);
     });
 
     it("onlyVoters", async () => {
-      await expectRevert(VotingInstance.getVoter(_Voter1), "You're not a voter");
-      await expectRevert(VotingInstance.getOneProposal(1), "You're not a voter");
+      // 1 - We test the two function, we need to be a voter
+      await expectRevert(VotingInstance.getVoter.call(_Voter1), "You're not a voter");
+      await expectRevert(VotingInstance.getOneProposal.call(1), "You're not a voter");
     });
 
     //State Testing OnlyOwner
     it("Status OnlyOwner", async () => {
+      // 1 - We test the changing status only for owner
       await expectRevert(VotingInstance.startProposalsRegistering({from: _Voter1}), _MsgNotOwner);
       await expectRevert(VotingInstance.endProposalsRegistering({ from: _Voter1}), _MsgNotOwner);
       await expectRevert(VotingInstance.startVotingSession({ from: _Voter1}), _MsgNotOwner);
@@ -55,9 +58,9 @@ contract("Voting", accounts => {
       await expectRevert(VotingInstance.tallyVotes({ from: _Voter1}), _MsgNotOwner);
     });
 
-    //State Testing Status
+    //State Testing Status and event
     it("Status Change", async () => {
-      //State RegisteringVoters. Impossible to endProposalsRegistering,startVotingSession,endVotingSession,tallyVotes. Just ProposalsRegistrationStarted
+      // 1 - State RegisteringVoters. Impossible to endProposalsRegistering,startVotingSession,endVotingSession,tallyVotes. Just ProposalsRegistrationStarted
       await expectRevert(VotingInstance.endProposalsRegistering({from: _owner}), _MsgRegisteringNotStarted);
       await expectRevert(VotingInstance.startVotingSession({from: _owner}), _MsgRegisteringNotFinished);
       await expectRevert(VotingInstance.endVotingSession({from: _owner}), _MsgVotingNotStarted);
@@ -69,8 +72,9 @@ contract("Voting", accounts => {
         previousStatus: new BN(0),
         newStatus: new BN(1)
       });
+      expect(await VotingInstance.workflowStatus.call()).to.be.bignumber.equal(new BN(1));
 
-      //State ProposalsRegistrationStarted. Impossible to RegisteringVoters,startVotingSession,endVotingSession,tallyVotes. Just endProposalsRegistering
+      // 2 - State ProposalsRegistrationStarted. Impossible to RegisteringVoters,startVotingSession,endVotingSession,tallyVotes. Just endProposalsRegistering
       await expectRevert(VotingInstance.startProposalsRegistering({from: _owner}), _MsgRegisteringCanStarted);
       await expectRevert(VotingInstance.startVotingSession({from: _owner}), _MsgRegisteringNotFinished);
       await expectRevert(VotingInstance.endVotingSession({from: _owner}), _MsgVotingNotStarted);
@@ -82,8 +86,9 @@ contract("Voting", accounts => {
         previousStatus: new BN(1),
         newStatus: new BN(2)
       });
+      expect(await VotingInstance.workflowStatus.call()).to.be.bignumber.equal(new BN(2));
 
-      //State endProposalsRegistering. Impossible to RegisteringVoters,ProposalsRegistrationStarted,endVotingSession,tallyVotes. Just startVotingSession
+      // 3 - State endProposalsRegistering. Impossible to RegisteringVoters,ProposalsRegistrationStarted,endVotingSession,tallyVotes. Just startVotingSession
       await expectRevert(VotingInstance.startProposalsRegistering({from: _owner}), _MsgRegisteringCanStarted);     
       await expectRevert(VotingInstance.endProposalsRegistering({from: _owner}), _MsgRegisteringNotStarted);
       await expectRevert(VotingInstance.endVotingSession({from: _owner}), _MsgVotingNotStarted);
@@ -95,8 +100,9 @@ contract("Voting", accounts => {
         previousStatus: new BN(2),
         newStatus: new BN(3)
       });
+      expect(await VotingInstance.workflowStatus.call()).to.be.bignumber.equal(new BN(3));
 
-      //State startVotingSession. Impossible to RegisteringVoters,ProposalsRegistrationStarted,endProposalsRegistering,tallyVotes. Just endVotingSession
+      // 4 - State startVotingSession. Impossible to RegisteringVoters,ProposalsRegistrationStarted,endProposalsRegistering,tallyVotes. Just endVotingSession
       await expectRevert(VotingInstance.startProposalsRegistering({from: _owner}), _MsgRegisteringCanStarted);     
       await expectRevert(VotingInstance.endProposalsRegistering({from: _owner}), _MsgRegisteringNotStarted);
       await expectRevert(VotingInstance.startVotingSession({from: _owner}), _MsgRegisteringNotFinished);
@@ -108,8 +114,9 @@ contract("Voting", accounts => {
         previousStatus: new BN(3),
         newStatus: new BN(4)
       });
+      expect(await VotingInstance.workflowStatus.call()).to.be.bignumber.equal(new BN(4));
 
-      //State endVotingSession. Impossible to startVotingSession, RegisteringVoters,ProposalsRegistrationStarted,endProposalsRegistering,. Just tallyVotes
+      // 5 - State endVotingSession. Impossible to startVotingSession, RegisteringVoters,ProposalsRegistrationStarted,endProposalsRegistering,. Just tallyVotes
       await expectRevert(VotingInstance.startProposalsRegistering({from: _owner}), _MsgRegisteringCanStarted);     
       await expectRevert(VotingInstance.endProposalsRegistering({from: _owner}), _MsgRegisteringNotStarted);
       await expectRevert(VotingInstance.startVotingSession({from: _owner}), _MsgRegisteringNotFinished);
@@ -121,8 +128,9 @@ contract("Voting", accounts => {
         previousStatus: new BN(4),
         newStatus: new BN(5)
       });
+      expect(await VotingInstance.workflowStatus.call()).to.be.bignumber.equal(new BN(5));
 
-      //End of status. Impossible to change
+      // 6 - End of status. Impossible to change
       await expectRevert(VotingInstance.startProposalsRegistering({from: _owner}), _MsgRegisteringCanStarted);     
       await expectRevert(VotingInstance.endProposalsRegistering({from: _owner}), _MsgRegisteringNotStarted);
       await expectRevert(VotingInstance.startVotingSession({from: _owner}), _MsgRegisteringNotFinished);
@@ -133,28 +141,28 @@ contract("Voting", accounts => {
     //Add voter. Check the require WorkflowStatus
     it("Add voter WorkflowStatus", async () => {
 
-      // 0 We need to be a voter
+      // 1 -  We need to be a voter
       await VotingInstance.addVoter(_Voter1);
 
       //RegisteringVoters = Add Voter Allowed = No Test
 
-      //ProposalsRegistrationStarted = Add Voter Not Allowed
+      // 2 - ProposalsRegistrationStarted = Add Voter Not Allowed
       await VotingInstance.startProposalsRegistering({from: _owner});
       await expectRevert(VotingInstance.addVoter(_Voter1,{from: _owner}), _MsgVotersRegistrationNotOpen);
       
-      //ProposalsRegistrationEnded = Add Voter Not Allowed
+      // 3 - ProposalsRegistrationEnded = Add Voter Not Allowed
       await VotingInstance.endProposalsRegistering({from: _owner});
       await expectRevert(VotingInstance.addVoter(_Voter1,{from: _owner}), _MsgVotersRegistrationNotOpen);
        
-      //VotingSessionStarted = Add Voter Not Allowed
+      // 4 - VotingSessionStarted = Add Voter Not Allowed
       await VotingInstance.startVotingSession({from: _owner});
       await expectRevert(VotingInstance.addVoter(_Voter1,{from: _owner}), _MsgVotersRegistrationNotOpen);
        
-      //VotingSessionEnded = Add Voter Not Allowed
+      // 5 - VotingSessionEnded = Add Voter Not Allowed
       await VotingInstance.endVotingSession({from: _owner});
       await expectRevert(VotingInstance.addVoter(_Voter1,{from: _owner}), _MsgVotersRegistrationNotOpen);
 
-      //VotesTallied = Add Voter Not Allowed
+      // 6 - VotesTallied = Add Voter Not Allowed
       await VotingInstance.tallyVotes({from: _owner});  
       await expectRevert(VotingInstance.addVoter(_Voter1,{from: _owner}), _MsgVotersRegistrationNotOpen);  
     })
@@ -162,7 +170,7 @@ contract("Voting", accounts => {
     //Add voter. if we added the voter, if we added twice and event
     it("Add voter", async () => {
 
-      //0 - We add voter and test emit
+      // 1 - We add voter and test emit
       const result = await VotingInstance.addVoter(_Voter1);
       expectEvent(result, 'VoterRegistered', {
         voterAddress: _Voter1
@@ -171,7 +179,7 @@ contract("Voting", accounts => {
       //2 - Double addvoter
       await expectRevert(VotingInstance.addVoter(_Voter1), _MsgAlreadyRegistered);
 
-      //2 - If the addVoter working
+      //3 - If the addVoter working
       let Voter_1 = await VotingInstance.getVoter(_Voter1,{from: _Voter1});
       expect(Voter_1.isRegistered).to.equal(true);
     })
@@ -179,28 +187,28 @@ contract("Voting", accounts => {
     //Add Proposal. Check the require WorkflowStatus
     it("Add proposal WorkflowStatus", async () => {
 
-      // 0 We need to be a voter
+      // 1 - We need to be a voter
       await VotingInstance.addVoter(_Voter1);
 
-      //RegisteringVoters = proposal not allowed
+      // 2 - RegisteringVoters = proposal not allowed
       await expectRevert(VotingInstance.addProposal("Proposal",{from: _Voter1}), _MsgProposalNotAllowed);
 
-      //ProposalsRegistrationStarted = proposal allowed = no Test
+      // 3 - ProposalsRegistrationStarted = proposal allowed = no Test
       await VotingInstance.startProposalsRegistering({from: _owner});
 
-      //endProposalsRegistering = proposal not allowed
+      // 4 - endProposalsRegistering = proposal not allowed
       await VotingInstance.endProposalsRegistering({from: _owner});
       await expectRevert(VotingInstance.addProposal("Proposal",{from: _Voter1}), _MsgProposalNotAllowed);
        
-      //startVotingSession = proposal not allowed
+      // 5 - startVotingSession = proposal not allowed
       await VotingInstance.startVotingSession({from: _owner});
       await expectRevert(VotingInstance.addProposal("Proposal",{from: _Voter1}), _MsgProposalNotAllowed);
        
-      //endVotingSession = proposal not allowed
+      // 6 - endVotingSession = proposal not allowed
       await VotingInstance.endVotingSession({from: _owner});
       await expectRevert(VotingInstance.addProposal("Proposal",{from: _Voter1}), _MsgProposalNotAllowed);
 
-      //VotesTallied = proposal not allowed
+      // 7 - VotesTallied = proposal not allowed
       await VotingInstance.tallyVotes({from: _owner});  
       await expectRevert(VotingInstance.addProposal("Proposal",{from: _Voter1}), _MsgProposalNotAllowed);      
     })
@@ -208,46 +216,50 @@ contract("Voting", accounts => {
     //Add proposal. if we added the proposal, if the proposal is empty and event
     it("Add proposal", async () => {
       
-      // 0 We need to be a voter and good status
+      // 1 - We need to be a voter and good status
       await VotingInstance.addVoter(_Voter1,{from: _owner});
       await VotingInstance.startProposalsRegistering({from: _owner});
 
-      // 1 - Proposal empty
+      // 2 - Proposal empty
       await expectRevert(VotingInstance.addProposal("",{from: _Voter1}), _MsgRienProposer);
 
-      // 2 - Event
+      // 3 - Event
       const result = await VotingInstance.addProposal("Proposal 1",{from: _Voter1});
       expectEvent(result, 'ProposalRegistered', {
         proposalId: new BN(1)
       });
+
+      // 4 - Proposal in blockchain = "Proposal 1"
+      let Propos = await VotingInstance.getOneProposal(1,{from: _Voter1});
+      expect(Propos.description).to.equal("Proposal 1");
     })    
 
   
     //Vote. Check the require WorkflowStatus
     it("Vote WorkflowStatus", async () => {
 
-      // 0 We need to be a voter, 
+      // 1 - We need to be a voter, 
       await VotingInstance.addVoter(_Voter1,{from: _owner});
 
-      //RegisteringVoters = vote not allowed
+      // 2 - RegisteringVoters = vote not allowed
       await expectRevert(VotingInstance.setVote(0,{from: _Voter1}), _MsgVotingNotStarted);
 
-      //ProposalsRegistrationStarted = vote not allowed
+      // 3 - ProposalsRegistrationStarted = vote not allowed
       await VotingInstance.startProposalsRegistering({from: _owner});
       await expectRevert(VotingInstance.setVote(0,{from: _Voter1}), _MsgVotingNotStarted);
 
-      //endProposalsRegistering = vote not allowed
+      // 4 - endProposalsRegistering = vote not allowed
       await VotingInstance.endProposalsRegistering({from: _owner});
       await expectRevert(VotingInstance.setVote(0,{from: _Voter1}), _MsgVotingNotStarted);
        
-      //startVotingSession = vote allowed = no test
+      // 5 - startVotingSession = vote allowed = no test
       await VotingInstance.startVotingSession({from: _owner});
        
-      //endVotingSession = vote not allowed
+      // 6 - endVotingSession = vote not allowed
       await VotingInstance.endVotingSession({from: _owner});
       await expectRevert(VotingInstance.setVote(0,{from: _Voter1}), _MsgVotingNotStarted);
 
-      //VotesTallied = vote not allowed
+      // 7 - VotesTallied = vote not allowed
       await VotingInstance.tallyVotes({from: _owner});  
       await expectRevert(VotingInstance.setVote(0,{from: _Voter1}), _MsgVotingNotStarted);    
     })
@@ -255,7 +267,7 @@ contract("Voting", accounts => {
     //Vote. if we vote, already vote, id exist and event
     it("Vote", async () => {
       
-      // 0 We need setup
+      // 1 - We need setup
       await VotingInstance.addVoter(_Voter1);
       await VotingInstance.addVoter(_Voter2);
       await VotingInstance.addVoter(_Voter3);
@@ -267,13 +279,13 @@ contract("Voting", accounts => {
 
       await VotingInstance.setVote(0,{from: _Voter1});
 
-      //1 - Already vote
+      // 2 - Already vote
       await expectRevert(VotingInstance.setVote(0,{from: _Voter1}), _MsgAlreadyVoted);
 
-      //2 - Vote for not existing id
+      // 3 - Vote for not existing id
       await expectRevert(VotingInstance.setVote(10,{from: _Voter2}), _MsgProposalNotFound);
 
-      //3 - Event
+      // 4 - Event
       const result = await VotingInstance.setVote(1,{from: _Voter3});
       expectEvent(result, 'Voted', {
         voter:_Voter3,
@@ -284,25 +296,25 @@ contract("Voting", accounts => {
     //tallyVotes. Check the require WorkflowStatus
     it("tallyVotes WorkflowStatus", async () => {
 
-      //RegisteringVoters = tallyVotes not allowed
+      // 1 - RegisteringVoters = tallyVotes not allowed
       await expectRevert(VotingInstance.tallyVotes({from: _owner}), _MsgVotingNotEnded);
 
-      //ProposalsRegistrationStarted = tallyVotes not allowed
+      // 2 - ProposalsRegistrationStarted = tallyVotes not allowed
       await VotingInstance.startProposalsRegistering({from: _owner});
       await expectRevert(VotingInstance.tallyVotes({from: _owner}), _MsgVotingNotEnded);
 
-      //endProposalsRegistering = tallyVotes not allowed
+      // 3 - endProposalsRegistering = tallyVotes not allowed
       await VotingInstance.endProposalsRegistering({from: _owner});
       await expectRevert(VotingInstance.tallyVotes({from: _owner}), _MsgVotingNotEnded);
        
-      //startVotingSession = tallyVotes not allowed
+      // 4 - startVotingSession = tallyVotes not allowed
       await VotingInstance.startVotingSession({from: _owner});
       await expectRevert(VotingInstance.tallyVotes({from: _owner}), _MsgVotingNotEnded);
        
-      //endVotingSession = tallyVotes allowed = no test
+      // 5 - endVotingSession = tallyVotes allowed = no test
       await VotingInstance.endVotingSession({from: _owner});
 
-      //VotesTallied = tallyVotes not allowed
+      // 6 - VotesTallied = tallyVotes not allowed
       await VotingInstance.tallyVotes({from: _owner});  
       await expectRevert(VotingInstance.tallyVotes({from: _owner}), _MsgVotingNotEnded); 
       
@@ -311,7 +323,7 @@ contract("Voting", accounts => {
     //tallyVotes. Check the id and event
     it("tallyVotes", async () => {
       
-      // 0 We need setup
+      // 1 - We need setup
       await VotingInstance.addVoter(_Voter1);
       await VotingInstance.addVoter(_Voter2);
       await VotingInstance.addVoter(_Voter3);
@@ -320,22 +332,52 @@ contract("Voting", accounts => {
       await VotingInstance.addProposal("Proposal 2",{from: _Voter2});
       await VotingInstance.endProposalsRegistering({from: _owner});
       await VotingInstance.startVotingSession({from: _owner});
-     // await VotingInstance.setVote(2,{from: _Voter1});
-     // await VotingInstance.setVote(1,{from: _Voter2});
-      //await VotingInstance.setVote(2,{from: _Voter3});
+      await VotingInstance.setVote(2,{from: _Voter1});
+      await VotingInstance.setVote(1,{from: _Voter2});
+      await VotingInstance.setVote(2,{from: _Voter3});
       await VotingInstance.endVotingSession({from: _owner});
 
-      //1 - Event
+      // 2 - Event
       const resulttallyVotes = await VotingInstance.tallyVotes({from: _owner});
       expectEvent(resulttallyVotes, 'WorkflowStatusChange', {
         previousStatus: new BN(4),
         newStatus: new BN(5)
       });
 
-
-      
-      
-
+      // 3 - Vote result
       expect(await VotingInstance.winningProposalID.call()).to.be.bignumber.not.equal(new BN(0));
+    }) 
+
+    //proposalsArray Size and value
+    it("Big proposalsArray", async () => {
+      
+      // 1 - We need setup
+      await VotingInstance.addVoter(_Voter1);
+      await VotingInstance.addVoter(_Voter2);
+      await VotingInstance.addVoter(_Voter3);
+      await VotingInstance.startProposalsRegistering({from: _owner});
+
+      // 2 - Add a lot of proposals
+      for (var i = 1; i < 10; i++) {
+        await VotingInstance.addProposal("Proposal "+i,{from: _Voter1});
+        let Propos = await VotingInstance.getOneProposal.call(i,{from: _Voter1});
+        expect(Propos.description).to.equal("Proposal "+i);
+      }  
+    }) 
+
+    //Big proposal. Size of string proposal
+    it("Big proposal", async () => {
+      
+      // 1 - We need setup
+      await VotingInstance.addVoter(_Voter1);
+      await VotingInstance.addVoter(_Voter2);
+      await VotingInstance.addVoter(_Voter3);
+      await VotingInstance.startProposalsRegistering({from: _owner});
+
+      // 2 - We test a big proposal
+      let bigstring = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum."
+      await VotingInstance.addProposal(bigstring,{from: _Voter1});
+      let Propos = await VotingInstance.getOneProposal.call(1,{from: _Voter1});
+      expect(Propos.description).to.equal(bigstring);
     }) 
 });
