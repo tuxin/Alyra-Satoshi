@@ -320,9 +320,9 @@ contract("Voting", accounts => {
       await VotingInstance.addProposal("Proposal 2",{from: _Voter2});
       await VotingInstance.endProposalsRegistering({from: _owner});
       await VotingInstance.startVotingSession({from: _owner});
-      await VotingInstance.setVote(2,{from: _Voter1});
-      await VotingInstance.setVote(1,{from: _Voter2});
-      await VotingInstance.setVote(2,{from: _Voter3});
+     // await VotingInstance.setVote(2,{from: _Voter1});
+     // await VotingInstance.setVote(1,{from: _Voter2});
+      //await VotingInstance.setVote(2,{from: _Voter3});
       await VotingInstance.endVotingSession({from: _owner});
 
       //1 - Event
