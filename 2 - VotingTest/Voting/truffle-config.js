@@ -47,6 +47,7 @@
 const HDWalletProvider = require('@truffle/hdwallet-provider'); 
 require('dotenv').config();
 
+
 module.exports = {
   /**
    * Networks define how you connect to your ethereum client and let you set the
@@ -120,6 +121,13 @@ module.exports = {
   // Set default mocha options here, use special reporters, etc.
   mocha: {
     // timeout: 100000
+    reporter: 'eth-gas-reporter',
+    reporterOptions:{
+      gasPrice:1,
+      token:'ETH',
+      showTimeSpent:false,
+      coinmarketcap:'8cbcfab7-c54b-4f1b-8004-0447b5ad03ec'
+    }
   },
 
   // Configure your compilers

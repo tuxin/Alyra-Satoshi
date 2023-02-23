@@ -496,7 +496,7 @@ contract("Voting", accounts => {
         it("Add voter verification", async () => {
           //1 - If the addVoter working
           let Voter_1 = await VotingInstance.getVoter(_Voter1,{from: _Voter1});
-          expect(Voter_1.isRegistered).to.equal(true);
+          expect(Voter_1.isRegistered).to.be.true;
         })
 
       });    
